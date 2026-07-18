@@ -97,10 +97,6 @@ function displayNewReason() {
         setTimeout(() => {
             isTransitioning = false;
         }, 500);
-    } else {
-        // Handle navigation to new page or section
-        window.location.href = "#storylane";
-        // Or trigger your next page functionality
     }
 }
 
