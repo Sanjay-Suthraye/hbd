@@ -9,6 +9,11 @@
  *   - It persists playback position + play/mute state in localStorage, so the
  *     song feels continuous as the visitor moves between pages.
  *
+ * Autoplay: browsers block audio WITH sound until the visitor interacts (iOS is
+ * strictest — there is no bypass). So we start the track playing MUTED at load
+ * (which browsers do allow), then auto-unmute on the visitor's first interaction
+ * of any kind (tap / click / scroll / keypress). An explicit mute is respected.
+ *
  * Drop your MP3 next to this file and point AUDIO_SRC at it.
  */
 (function () {
@@ -112,24 +117,44 @@
         }
 
         // --- Autoplay handling ----------------------------------------------
-        // Browsers block audio until a user gesture. Try to play; if that
-        // rejects, start on the visitor's first interaction with the page.
+        // Browsers block audio WITH sound until a user gesture. So: try to play
+        // with sound; if blocked, fall back to MUTED autoplay (allowed) so the
+        // track still starts at load, then unmute on the first interaction.
+        // `autoMuted` marks a mute we applied only to satisfy autoplay — it is
+        // distinct from the visitor's explicit mute preference (state.muted).
+        var autoMuted = false;
+
         function startPlayback() {
             var attempt = audio.play();
             if (attempt && typeof attempt.then === 'function') {
-                attempt.then(function () {
-                    renderPlay();
-                }).catch(function () {
+                attempt.then(renderPlay).catch(function () {
+                    // Sound was blocked — start muted so it plays from load,
+                    // unless the visitor has explicitly chosen mute already.
+                    if (!state.muted) {
+                        audio.muted = true;
+                        autoMuted = true;
+                        renderMute();
+                    }
+                    audio.play().then(renderPlay).catch(function () {
+                        // Even muted autoplay blocked — wait for the gesture.
+                    });
                     armFirstGesture();
                     renderPlay();
                 });
             }
         }
 
-        var gestureEvents = ['pointerdown', 'keydown', 'touchstart'];
+        var gestureEvents = ['pointerdown', 'touchstart', 'touchend', 'click', 'keydown', 'scroll'];
         function onFirstGesture() {
             disarmFirstGesture();
-            if (!state.paused) { audio.play().then(renderPlay).catch(function () {}); }
+            if (state.paused) { return; }
+            // Unmute if we only muted to get autoplay going (respect explicit mute).
+            if (autoMuted && !state.muted) {
+                audio.muted = false;
+                autoMuted = false;
+                renderMute();
+            }
+            audio.play().then(renderPlay).catch(function () {});
         }
         function armFirstGesture() {
             gestureEvents.forEach(function (ev) {
@@ -158,7 +183,9 @@
         });
 
         muteBtn.addEventListener('click', function () {
+            autoMuted = false; // visitor is taking manual control of mute
             audio.muted = !audio.muted;
+            state.muted = audio.muted;
             save(KEYS.muted, audio.muted ? 'true' : 'false');
             renderMute();
         });
