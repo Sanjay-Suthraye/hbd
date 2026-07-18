@@ -5,13 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Birthday</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="style.css">
     
 </head>
 <body>
     <div class="cursor"></div>
+
+    <!-- balloons drifting up -->
+    <div class="balloons" aria-hidden="true">
+        <span class="balloon b1"></span>
+        <span class="balloon b2"></span>
+        <span class="balloon b3"></span>
+        <span class="balloon b4"></span>
+    </div>
+
     <div class="container">
         <h1>Happy Birthday Ishita 💗</h1>
+
+        <!-- little birthday cake with a flickering candle -->
+        <div class="cake" aria-hidden="true">
+            <div class="candle"><span class="flame"></span></div>
+            <div class="icing"></div>
+            <div class="base"></div>
+        </div>
+
         <div class="greeting"></div>
         <button class="cta-button">Click to Enter Our World 💕</button>
     </div>
@@ -20,5 +38,6 @@
 
     </script>
     <script src="music.js" defer></script>
+    <script src="cute.js" defer></script>
 </body>
 </html>

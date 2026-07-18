@@ -19,7 +19,7 @@ function typeGreeting() {
 }
 
 // Create floating elements
-const floatingElements = ['💖', '✨', '🌸', '💫', '💕'];
+const floatingElements = ['💖', '✨', '🌸', '💫', '💕', '🎈', '🎂', '🥳', '🎀'];
 function createFloating() {
     const element = document.createElement('div');
     element.className = 'floating';
@@ -40,8 +40,23 @@ function createFloating() {
     });
 }
 
+// Gentle confetti burst when the landing opens (degrades gracefully if the CDN fails)
+function landingConfetti() {
+    if (typeof confetti !== 'function') return;
+    confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 },
+        colors: ['#ff69b4', '#ff99cc', '#c9a7ff', '#9ad0ff', '#ffd28a'] });
+    setTimeout(() => {
+        if (typeof confetti === 'function') {
+            confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+            confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+        }
+    }, 400);
+}
+
 // Initialize animations
 window.addEventListener('load', () => {
+    landingConfetti();
+
     // Title animation
     gsap.to('h1', {
         opacity: 1,
